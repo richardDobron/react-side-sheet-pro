@@ -1,0 +1,105 @@
+import React, {
+  createContext,
+  ReactNode,
+  useCallback,
+  useEffect,
+  useReducer,
+  useRef,
+} from 'react';
+import { createPortal } from 'react-dom';
+import {
+  DEFAULT_OPTIONS,
+  DEFAULT_SHEET_OPTIONS,
+} from '../constants/defaultOptions';
+import {
+  SideElement,
+  SideOptions,
+  SideSheetContextValue,
+  SideSheetOptions,
+  SideStackItem,
+} from '../types';
+import { SideSheetContainer } from '../components/SideSheetContainer';
+import { SideSheetReducer } from '../contexts/SideSheetReducer';
+
+export const SideSheetContext = createContext<SideSheetContextValue | null>(
+  null
+);
+
+export const SideSheetProvider: React.FC<{
+  children: ReactNode;
+  configuration: Partial<SideSheetOptions>;
+}> = ({ children, configuration }) => {
+  const [stack, dispatch] = useReducer(SideSheetReducer, []);
+  const idRef = useRef(0);
+  const stackRef = useRef<SideStackItem[]>(stack);
+
+  useEffect(() => {
+    stackRef.current = stack;
+  }, [stack]);
+
+  const open = useCallback((element: SideElement, opts: SideOptions = {}) => {
+    const id = ++idRef.current;
+    const options = { ...DEFAULT_SHEET_OPTIONS, ...opts };
+    dispatch({
+      type: 'OPEN',
+      payload: { id, element, options, state: 'opening' },
+    });
+    setTimeout(() => {
+      dispatch({ type: 'SET_OPEN', id });
+      options.onOpen?.(id);
+    }, options.animationDuration);
+    return id;
+  }, []);
+
+  const close = useCallback(async (id: number | null) => {
+    const itemsToClose =
+      id === null
+        ? [...stackRef.current]
+        : stackRef.current.filter(i => i.id === id);
+
+    for (const item of itemsToClose) {
+      if (item.options.confirmBeforeClose) {
+        const confirmed = await item.options.confirmCallback(
+          item.options.confirmMessage
+        );
+        if (!confirmed) return;
+      }
+      item.options.onClose?.(item.id);
+    }
+    const duration =
+      itemsToClose[itemsToClose.length - 1]?.options.animationDuration;
+    dispatch({ type: 'CLOSE', id });
+    setTimeout(() => {
+      if (id === null) {
+        stackRef.current.forEach(item =>
+          dispatch({ type: 'REMOVE', id: item.id })
+        );
+      } else {
+        dispatch({ type: 'REMOVE', id: id! });
+      }
+    }, duration);
+  }, []);
+
+  const update = useCallback((id: number, options: Partial<SideOptions>) => {
+    dispatch({ type: 'UPDATE', id, options });
+  }, []);
+  const config = { ...DEFAULT_OPTIONS, ...configuration } as Required<
+    SideSheetOptions
+  >;
+
+  return (
+    <SideSheetContext.Provider value={{ open, close, update, config }}>
+      {children}
+      {createPortal(
+        <SideSheetContainer
+          stack={stack}
+          close={close}
+          open={open}
+          update={update}
+          config={config}
+        />,
+        document.body
+      )}
+    </SideSheetContext.Provider>
+  );
+};
