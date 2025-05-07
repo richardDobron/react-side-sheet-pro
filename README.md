@@ -6,7 +6,7 @@ This panel can slide in from either the left or right side of the screen and is 
 
 ## 👀 Live Preview
 
-- [Codepen](https://codepen.io/richard-dobro/pen/LEEBGya)
+[![Edit react-side-sheet-pro](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/p/sandbox/9mxzqg)
 
 ## 💡 Use cases
 - Viewing a user's profile or related details
