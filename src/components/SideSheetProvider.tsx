@@ -18,7 +18,7 @@ import {
   SideSheetOptions,
   SideStackItem,
 } from '../types';
-import { SideSheetContainer } from '../components/SideSheetContainer';
+import { SideSheetContainer } from './SideSheetContainer';
 import { SideSheetReducer } from '../contexts/SideSheetReducer';
 
 export const SideSheetContext = createContext<SideSheetContextValue | null>(
@@ -27,7 +27,7 @@ export const SideSheetContext = createContext<SideSheetContextValue | null>(
 
 export const SideSheetProvider: React.FC<{
   children: ReactNode;
-  configuration: Partial<SideSheetOptions>;
+  configuration?: Partial<SideSheetOptions>;
 }> = ({ children, configuration }) => {
   const [stack, dispatch] = useReducer(SideSheetReducer, []);
   const idRef = useRef(0);
