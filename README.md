@@ -18,6 +18,16 @@ This panel can slide in from either the left or right side of the screen and is 
 
 React 0.14.0 - 18.x.x
 
+## ✨ Key Features
+
+- 🚀 **Easy Integration**: Get started with minimal setup.
+- 📱 **Responsive Design**: Optimized for all screen sizes.
+- 💪 **TypeScript Compatibility**: Fully typed for a seamless developer experience.
+- 🔄 **Nested Sheets**: Support for opening multiple side sheets in a nested manner.
+- 🎨 **Customizable**: Easily adjust width, styles, and behavior to fit your needs.
+- 👌 **State Management Included**: Built-in hooks for managing the state of the side sheet.
+- ⚡ **Lightweight and Fast**: Minimal dependencies for a quick and smooth user experience.
+- 🧩 **Modular Components**: Use only the parts you need, like header, content, and footer.
 
 ## 📦 Installation
 
@@ -33,6 +43,7 @@ yarn add react-side-sheet-pro
 ```typescript jsx
 import React from 'react'
 import { SideSheet, useSideSheet, SideElementProps } from 'react-side-sheet-pro'
+import 'react-side-sheet-pro/dist/index.css'
 
 const UserDetails: React.FC<SideElementProps & { user: any }> = ({
     user,
