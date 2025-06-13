@@ -6,7 +6,7 @@
         "react-side-sheet-pro": "file:..",
         "react": "file:../node_modules/react",
         "react-dom": "file:../node_modules/react-dom",
-        "react-scripts": "^5"
+        "react-scripts": "5.0.1"
     },
     "scripts": {
         "start": "react-scripts start",
