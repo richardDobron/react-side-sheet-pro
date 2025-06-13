@@ -16,7 +16,7 @@ This panel can slide in from either the left or right side of the screen and is 
 
 ## ℹ️ Compatibility
 
-React 0.14.0 - 18.x.x
+React 0.14.0 - 19.x.x
 
 ## ✨ Key Features
 
