@@ -9,6 +9,7 @@ export const SideSheetHeader: React.FC<{
   <header className="sidesheet-header">
     {onClose && (
       <button
+        type="button"
         className="sidesheet-header-close sidesheet-header-btn"
         onClick={onClose}
       >
