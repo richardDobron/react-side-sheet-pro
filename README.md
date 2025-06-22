@@ -94,12 +94,55 @@ export const App = () => {
     )
 }
 
+// Wrap your app with the SideSheet.Provider to manage side sheets globally
+
 export default () => (
     <SideSheet.Provider>
         <App />
     </SideSheet.Provider>
 )
 ```
+
+## 🧩 Compound Components
+
+### `Sheet.Provider`
+
+Sheet provider component that manages the state of all side sheets in your application. It should wrap your main application component.
+
+### `Sheet.Header`
+
+Sheet header component that displays the title and can include custom actions. It also provides custom `onClick` function for a button to close the sheet.
+
+#### Header props
+
+| Name      | Required | Default   | Description                             |
+|-----------|----------|-----------|-----------------------------------------|
+| `title`   | yes      |           | Title of the header.                    |
+| `onClose` | no       | undefined | Callback function to close the sheet.   |
+| `actions` | no       | undefined | Custom actions to render in the header. |
+
+### `Sheet.Content`
+
+Sheet content component that wraps the main content of the side sheet. Can be styled using custom classes.
+
+#### Content props
+
+| Name        | Required | Default   | Description                               |
+|-------------|----------|-----------|-------------------------------------------|
+| `children`  | yes      |           | Content to display inside the side sheet. |
+| `className` | no       | undefined | Custom CSS class for additional styling.  |
+
+### `Sheet.Footer`
+
+Sheet footer component that can be used to display actions or additional information at the bottom of the side sheet. Can be styled using custom classes.
+
+#### Footer props
+
+| Name        | Required | Default   | Description                              |
+|-------------|----------|-----------|------------------------------------------|
+| `children`  | yes      |           | Content to display inside the footer.    |
+| `className` | no       | undefined | Custom CSS class for additional styling. |
+
 
 ## 🧪 Testing
 
