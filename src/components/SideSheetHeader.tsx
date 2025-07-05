@@ -1,12 +1,14 @@
 import React, { ReactNode } from 'react';
 import { HiX } from 'react-icons/hi';
+import classNames from 'classnames';
 
 export const SideSheetHeader: React.FC<{
   title: string;
   onClose?: () => void;
   actions?: ReactNode;
-}> = React.memo(({ title, onClose, actions }) => (
-  <header className="sidesheet-header">
+  className?: string;
+}> = React.memo(({ title, onClose, actions, className }) => (
+  <header className={classNames('sidesheet-header', className)}>
     {onClose && (
       <button
         type="button"

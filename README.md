@@ -115,11 +115,12 @@ Sheet header component that displays the title and can include custom actions. I
 
 #### Header props
 
-| Name      | Required | Default   | Description                             |
-|-----------|----------|-----------|-----------------------------------------|
-| `title`   | yes      |           | Title of the header.                    |
-| `onClose` | no       | undefined | Callback function to close the sheet.   |
-| `actions` | no       | undefined | Custom actions to render in the header. |
+| Name        | Required | Default   | Description                              |
+|-------------|----------|-----------|------------------------------------------|
+| `title`     | yes      |           | Title of the header.                     |
+| `onClose`   | no       | undefined | Callback function to close the sheet.    |
+| `actions`   | no       | undefined | Custom actions to render in the header.  |
+| `className` | no       | undefined | Custom CSS class for additional styling. |
 
 ### `Sheet.Content`
 
