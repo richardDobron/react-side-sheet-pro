@@ -5,14 +5,16 @@ export type Sides = 'left' | 'right';
 export interface SideSheetOptions {
   side: Sides;
   mountStrategy: 'all' | 'top-only';
+  confirmMessage: string;
+  confirmCallback: (message: string) => Promise<boolean>;
 }
 
 export interface SideOptions {
   width?: number;
   className?: string;
   confirmBeforeClose?: boolean;
-  confirmMessage?: string;
-  confirmCallback?: (message: string) => Promise<boolean>;
+  confirmMessage?: string | null;
+  confirmCallback?: ((message: string) => Promise<boolean>) | null;
   closeOnOverlayClick?: boolean;
   closeOnEsc?: boolean;
   animationDuration?: number;

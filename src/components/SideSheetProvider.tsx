@@ -59,8 +59,10 @@ export const SideSheetProvider: React.FC<{
 
     for (const item of itemsToClose) {
       if (item.options.confirmBeforeClose) {
-        const confirmed = await item.options.confirmCallback(
-          item.options.confirmMessage
+        const confirmCallback =
+          item.options.confirmCallback ?? config.confirmCallback;
+        const confirmed = await confirmCallback(
+          item.options.confirmMessage ?? config.confirmMessage
         );
         if (!confirmed) return;
       }
