@@ -4,6 +4,7 @@ export type Sides = 'left' | 'right';
 
 export interface SideSheetOptions {
   side: Sides;
+  enableOverflow: boolean;
   mountStrategy: 'all' | 'top-only';
   confirmMessage: string;
   confirmCallback: (message: string) => Promise<boolean>;

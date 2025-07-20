@@ -30,8 +30,9 @@ export const SideSheetProvider: React.FC<{
   configuration?: Partial<SideSheetOptions>;
 }> = ({ children, configuration }) => {
   const [stack, dispatch] = useReducer(SideSheetReducer, []);
-  const idRef = useRef(0);
   const stackRef = useRef<SideStackItem[]>(stack);
+  const overflowRef = useRef('');
+  const idRef = useRef(0);
 
   useEffect(() => {
     stackRef.current = stack;
@@ -40,6 +41,10 @@ export const SideSheetProvider: React.FC<{
   const open = useCallback((element: SideElement, opts: SideOptions = {}) => {
     const id = ++idRef.current;
     const options = { ...DEFAULT_SHEET_OPTIONS, ...opts };
+    if (!config.enableOverflow && stackRef.current.length === 0) {
+      overflowRef.current = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+    }
     dispatch({
       type: 'OPEN',
       payload: { id, element, options, state: 'opening' },
@@ -68,14 +73,20 @@ export const SideSheetProvider: React.FC<{
       }
       item.options.onClose?.(item.id);
     }
+
+    if (
+        !config.enableOverflow &&
+        stackRef.current.length <= itemsToClose.length
+    ) {
+      document.body.style.overflow = overflowRef.current;
+    }
+
     const duration =
       itemsToClose[itemsToClose.length - 1]?.options.animationDuration;
     dispatch({ type: 'CLOSE', id });
     setTimeout(() => {
       if (id === null) {
-        stackRef.current.forEach(item =>
-          dispatch({ type: 'REMOVE', id: item.id })
-        );
+        itemsToClose.forEach(item => dispatch({ type: 'REMOVE', id: item.id }));
       } else {
         dispatch({ type: 'REMOVE', id: id! });
       }

@@ -2,12 +2,13 @@ import { SideOptions, SideSheetOptions } from '../types';
 
 export const DEFAULT_OPTIONS: Required<SideSheetOptions> = {
   side: 'right',
+  enableOverflow: false,
   mountStrategy: 'all',
   confirmMessage: 'Are you sure you want to close?',
   confirmCallback: async (msg: string) =>
-      typeof window !== 'undefined'
-          ? Promise.resolve(window.confirm(msg))
-          : Promise.resolve(true),
+    typeof window !== 'undefined'
+      ? Promise.resolve(window.confirm(msg))
+      : Promise.resolve(true),
 };
 
 export const DEFAULT_SHEET_OPTIONS: Required<SideOptions> = {
