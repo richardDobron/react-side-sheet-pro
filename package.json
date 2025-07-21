@@ -15,7 +15,7 @@
   "jsnext:main": "dist/index.esm.js",
   "browser:min": "dist/index.umd.min.js",
   "browser": "dist/index.umd.js",
-  "typings": "dist/index.d.ts",
+  "typings": "index.d.ts",
   "files": [
     "dist",
     "src",
