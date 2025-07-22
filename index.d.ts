@@ -22,7 +22,7 @@ interface SideOptions {
 }
 interface SideElementProps {
     sideId: number;
-    close: (id: number | null) => Promise<void>;
+    close: (id: number | null, force?: boolean) => Promise<void>;
     open: (element: SideElement, options?: SideOptions) => number;
     update: (id: number, options: SideOptions) => void;
     options: SideOptions;
@@ -36,7 +36,7 @@ interface SideStackItem {
 }
 interface SideSheetContextValue {
     open: (el: SideElement, opts?: SideOptions) => number;
-    close: (id: number | null) => Promise<void>;
+    close: (id: number | null, force?: boolean) => Promise<void>;
     update: (id: number, opts: SideOptions) => void;
     config: SideSheetOptions;
 }

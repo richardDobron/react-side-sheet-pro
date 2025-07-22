@@ -42,7 +42,7 @@ export interface SideStackItem {
 
 export interface SideSheetContextValue {
   open: (el: SideElement, opts?: SideOptions) => number;
-  close: (id: number | null) => Promise<void>;
+  close: (id: number | null, force: boolean) => Promise<void>;
   update: (id: number, opts: SideOptions) => void;
   config: SideSheetOptions;
 }

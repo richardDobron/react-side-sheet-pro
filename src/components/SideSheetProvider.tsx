@@ -56,14 +56,14 @@ export const SideSheetProvider: React.FC<{
     return id;
   }, []);
 
-  const close = useCallback(async (id: number | null) => {
+  const close = useCallback(async (id: number | null, force = false) => {
     const itemsToClose =
       id === null
         ? [...stackRef.current]
         : stackRef.current.filter(i => i.id === id);
 
     for (const item of itemsToClose) {
-      if (item.options.confirmBeforeClose) {
+      if (! force && item.options.confirmBeforeClose) {
         const confirmCallback =
           item.options.confirmCallback ?? config.confirmCallback;
         const confirmed = await confirmCallback(
