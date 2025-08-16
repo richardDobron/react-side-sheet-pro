@@ -39,7 +39,7 @@ export const SideSheetProvider: React.FC<{
   }, [stack]);
 
   const open = useCallback((element: SideElement, opts: SideOptions = {}) => {
-    const id = ++idRef.current;
+    const id = opts.id ?? ++idRef.current;
     const options = { ...DEFAULT_SHEET_OPTIONS, ...opts };
     if (!config.enableOverflow && stackRef.current.length === 0) {
       overflowRef.current = document.body.style.overflow;
@@ -56,7 +56,7 @@ export const SideSheetProvider: React.FC<{
     return id;
   }, []);
 
-  const close = useCallback(async (id: number | null, force = false) => {
+  const close = useCallback(async (id: number | string | null, force = false) => {
     const itemsToClose =
       id === null
         ? [...stackRef.current]
@@ -93,7 +93,7 @@ export const SideSheetProvider: React.FC<{
     }, duration);
   }, []);
 
-  const update = useCallback((id: number, options: Partial<SideOptions>) => {
+  const update = useCallback((id: number | string, options: Partial<SideOptions>) => {
     dispatch({ type: 'UPDATE', id, options });
   }, []);
   const config = { ...DEFAULT_OPTIONS, ...configuration } as Required<

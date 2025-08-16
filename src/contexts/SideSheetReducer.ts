@@ -2,10 +2,10 @@ import { SideOptions, SideStackItem } from '../types';
 
 type Action =
   | { type: 'OPEN'; payload: SideStackItem }
-  | { type: 'SET_OPEN'; id: number }
-  | { type: 'CLOSE'; id: number | null }
-  | { type: 'REMOVE'; id: number }
-  | { type: 'UPDATE'; id: number; options: Partial<SideOptions> };
+  | { type: 'SET_OPEN'; id: number | string }
+  | { type: 'CLOSE'; id: number | string | null }
+  | { type: 'REMOVE'; id: number | string }
+  | { type: 'UPDATE'; id: number | string; options: Partial<SideOptions> };
 
 export const SideSheetReducer = (
   state: SideStackItem[],

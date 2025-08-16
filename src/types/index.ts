@@ -11,6 +11,7 @@ export interface SideSheetOptions {
 }
 
 export interface SideOptions {
+  id?: string | number;
   width?: number;
   className?: string;
   confirmBeforeClose?: boolean;
@@ -19,30 +20,30 @@ export interface SideOptions {
   closeOnOverlayClick?: boolean;
   closeOnEsc?: boolean;
   animationDuration?: number;
-  onOpen?: (id: number) => void;
-  onClose?: (id: number) => void;
+  onOpen?: (id: number | string) => void;
+  onClose?: (id: number | string) => void;
 }
 
 export interface SideElementProps {
-  sideId: number;
-  close: (id: number | null) => Promise<void>;
-  open: (element: SideElement, options?: SideOptions) => number;
-  update: (id: number, options: SideOptions) => void;
+  sideId: number | string;
+  close: (id: number | string | null) => Promise<void>;
+  open: (element: SideElement, options?: SideOptions) => number | string;
+  update: (id: number | string, options: SideOptions) => void;
   options: SideOptions;
 }
 
 export type SideElement = (props: SideElementProps) => ReactNode;
 
 export interface SideStackItem {
-  id: number;
+  id: number | string;
   element: SideElement;
   options: Required<SideOptions>;
   state: 'opening' | 'open' | 'closing';
 }
 
 export interface SideSheetContextValue {
-  open: (el: SideElement, opts?: SideOptions) => number;
-  close: (id: number | null, force: boolean) => Promise<void>;
-  update: (id: number, opts: SideOptions) => void;
+  open: (el: SideElement, opts?: SideOptions) => number | string;
+  close: (id: number | string | null, force: boolean) => Promise<void>;
+  update: (id: number | string, opts: SideOptions) => void;
   config: SideSheetOptions;
 }

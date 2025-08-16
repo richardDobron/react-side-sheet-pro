@@ -9,9 +9,9 @@ import {
 
 type SideSheetContainerProps = {
   stack: SideStackItem[];
-  open: (el: SideElement, opts?: SideOptions) => number;
-  close: (id: number | null) => Promise<void>;
-  update: (id: number, opts: SideOptions) => void;
+  open: (el: SideElement, opts?: SideOptions) => number | string;
+  close: (id: number | string | null) => Promise<void>;
+  update: (id: number | string, opts: SideOptions) => void;
   config: Required<SideSheetOptions>;
 };
 
