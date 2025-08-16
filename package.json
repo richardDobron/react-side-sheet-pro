@@ -1,7 +1,7 @@
 {
   "name": "react-side-sheet-pro",
   "description": "A flexible React SideSheet component for displaying contextual information.",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "license": "MIT",
   "keywords": [
     "react",
