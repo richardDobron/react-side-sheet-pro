@@ -36,6 +36,10 @@ export const SideSheetProvider: React.FC<{
 
   useEffect(() => {
     stackRef.current = stack;
+
+    if (!config.enableOverflow && !stack.length) {
+      document.body.style.overflow = overflowRef.current;
+    }
   }, [stack]);
 
   const open = useCallback((element: SideElement, opts: SideOptions = {}) => {
@@ -56,46 +60,50 @@ export const SideSheetProvider: React.FC<{
     return id;
   }, []);
 
-  const close = useCallback(async (id: number | string | null, force = false) => {
-    const itemsToClose =
-      id === null
-        ? [...stackRef.current]
-        : stackRef.current.filter(i => i.id === id);
+  const close = useCallback(
+    async (id: number | string | null, force = false) => {
+      const itemsToClose =
+        id === null
+          ? [...stackRef.current]
+          : stackRef.current.filter(i => i.id === id);
 
-    for (const item of itemsToClose) {
-      if (! force && item.options.confirmBeforeClose) {
-        const confirmCallback =
-          item.options.confirmCallback ?? config.confirmCallback;
-        const confirmed = await confirmCallback(
-          item.options.confirmMessage ?? config.confirmMessage
-        );
-        if (!confirmed) return;
+      for (const item of itemsToClose) {
+        if (!force && item.options.confirmBeforeClose) {
+          const confirmCallback =
+            item.options.confirmCallback ?? config.confirmCallback;
+          const confirmed = await confirmCallback(
+            item.options.confirmMessage ?? config.confirmMessage
+          );
+          if (!confirmed) return;
+        }
+        item.options.onClose?.(item.id);
       }
-      item.options.onClose?.(item.id);
-    }
 
-    if (
-        !config.enableOverflow &&
-        stackRef.current.length <= itemsToClose.length
-    ) {
-      document.body.style.overflow = overflowRef.current;
-    }
+      const duration =
+        itemsToClose[itemsToClose.length - 1]?.options.animationDuration;
+      dispatch({ type: 'CLOSE', id });
+      return new Promise<void>(resolve => {
+        setTimeout(() => {
+          if (id === null) {
+            itemsToClose.forEach(item =>
+              dispatch({ type: 'REMOVE', id: item.id })
+            );
+          } else {
+            dispatch({ type: 'REMOVE', id: id! });
+          }
+          resolve();
+        }, duration);
+      });
+    },
+    []
+  );
 
-    const duration =
-      itemsToClose[itemsToClose.length - 1]?.options.animationDuration;
-    dispatch({ type: 'CLOSE', id });
-    setTimeout(() => {
-      if (id === null) {
-        itemsToClose.forEach(item => dispatch({ type: 'REMOVE', id: item.id }));
-      } else {
-        dispatch({ type: 'REMOVE', id: id! });
-      }
-    }, duration);
-  }, []);
-
-  const update = useCallback((id: number | string, options: Partial<SideOptions>) => {
-    dispatch({ type: 'UPDATE', id, options });
-  }, []);
+  const update = useCallback(
+    (id: number | string, options: Partial<SideOptions>) => {
+      dispatch({ type: 'UPDATE', id, options });
+    },
+    []
+  );
   const config = { ...DEFAULT_OPTIONS, ...configuration } as Required<
     SideSheetOptions
   >;
