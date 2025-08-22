@@ -12,6 +12,7 @@ export const DEFAULT_OPTIONS: Required<SideSheetOptions> = {
 };
 
 export const DEFAULT_SHEET_OPTIONS: Required<SideOptions> = {
+  id: '',
   width: 400,
   className: '',
   confirmBeforeClose: false,

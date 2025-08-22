@@ -31,24 +31,30 @@ export const SideSheetProvider: React.FC<{
 }> = ({ children, configuration }) => {
   const [stack, dispatch] = useReducer(SideSheetReducer, []);
   const stackRef = useRef<SideStackItem[]>(stack);
-  const overflowRef = useRef('');
+  const overflowRef = useRef<string | null>(null);
   const idRef = useRef(0);
 
   useEffect(() => {
     stackRef.current = stack;
 
-    if (!config.enableOverflow && !stack.length) {
-      document.body.style.overflow = overflowRef.current;
+    if (!config.enableOverflow) {
+      if (!stack.length) {
+        if (overflowRef.current !== null) {
+          document.body.style.overflow = overflowRef.current;
+          overflowRef.current = null;
+        }
+      } else if (stack.length === 1) {
+        if (overflowRef.current === null) {
+          overflowRef.current = document.body.style.overflow;
+        }
+        document.body.style.overflow = 'hidden';
+      }
     }
   }, [stack]);
 
   const open = useCallback((element: SideElement, opts: SideOptions = {}) => {
     const id = opts.id ?? ++idRef.current;
     const options = { ...DEFAULT_SHEET_OPTIONS, ...opts };
-    if (!config.enableOverflow && stackRef.current.length === 0) {
-      overflowRef.current = document.body.style.overflow;
-      document.body.style.overflow = 'hidden';
-    }
     dispatch({
       type: 'OPEN',
       payload: { id, element, options, state: 'opening' },
