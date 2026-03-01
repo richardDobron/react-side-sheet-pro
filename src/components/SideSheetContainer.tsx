@@ -15,6 +15,44 @@ type SideSheetContainerProps = {
   config: Required<SideSheetOptions>;
 };
 
+function getStackItemMeta(stack: SideStackItem[], idx: number) {
+  const prev = stack[idx - 1];
+  const next = stack[idx + 1];
+  return {
+    prev,
+    next,
+    isTop: idx === stack.length - 1,
+    isPrevClosing: prev?.state === 'closing',
+    isNextTransitioning: next?.state === 'closing' || next?.state === 'opening',
+  };
+}
+
+function computePadding(
+  stack: SideStackItem[],
+  idx: number
+): number | undefined {
+  const { next, isTop, isPrevClosing, isNextTransitioning } = getStackItemMeta(
+    stack,
+    idx
+  );
+
+  if (isTop || isPrevClosing || isNextTransitioning || !next) return undefined;
+
+  const viewportWidth = document.documentElement.clientWidth;
+  const maxWidth = stack[stack.length - 1]?.options.width ?? 0;
+
+  let padding = 0;
+  if (viewportWidth >= 1160) {
+    padding = Math.floor((viewportWidth - 960) / 2);
+  } else if (viewportWidth >= 768) {
+    padding = Math.floor((viewportWidth - 768) / 2);
+  }
+
+  padding = Math.min(padding, maxWidth);
+
+  return padding > 0 ? padding : next.options.width / 2;
+}
+
 export const SideSheetContainer: React.FC<SideSheetContainerProps> = ({
   stack,
   open,
@@ -38,49 +76,64 @@ export const SideSheetContainer: React.FC<SideSheetContainerProps> = ({
     };
   }, [stack, close]);
 
+  const paddingKey = config.side === 'left' ? 'paddingLeft' : 'paddingRight';
+
   return (
     <>
       {stack.map((item, idx) => {
-        const isTop = idx === stack.length - 1;
-        const isPrevClosing = stack[idx - 1]?.state === 'closing';
+        const {
+          next,
+          isTop,
+          isPrevClosing,
+          isNextTransitioning,
+        } = getStackItemMeta(stack, idx);
         const { width, closeOnOverlayClick, className } = item.options;
 
-        if (config.mountStrategy === 'top-only' && !isTop && !isPrevClosing)
-          return null;
+        const isEffectiveTop = isTop || isPrevClosing;
+        const isVisible = !(
+          config.mountStrategy === 'top-only' && !isEffectiveTop
+        );
+        const paddingValue =
+          isEffectiveTop || isNextTransitioning || !next
+            ? undefined
+            : `${computePadding(stack, idx)}px`;
+
+        const elementProps = {
+          sideId: item.id,
+          options: item.options,
+          close,
+          open,
+          update,
+        };
 
         return (
           <React.Fragment key={item.id}>
-            <div
-              className="sidesheet-overlay"
-              onClick={() => {
-                if (closeOnOverlayClick && item.state === 'open') {
-                  close(item.id);
-                }
-              }}
-            />
+            {isVisible && (
+              <div
+                className="sidesheet-overlay"
+                onClick={() => {
+                  if (closeOnOverlayClick && item.state === 'open') {
+                    close(item.id);
+                  }
+                }}
+              />
+            )}
             <div
               role="dialog"
               aria-modal="true"
               className={classNames(
                 'sidesheet',
                 `sidesheet-animation-${item.state}`,
-                {
-                  'sidesheet-left': config.side === 'left',
-                  'sidesheet-right': config.side === 'right',
-                },
+                `sidesheet-${config.side}`,
+                !isVisible && 'sidesheet-invisible',
                 className
               )}
               style={{
-                width: `${isTop || isPrevClosing ? `${width}px` : '100%'}`,
+                width: isEffectiveTop ? `${width}px` : '100%',
+                [paddingKey]: paddingValue,
               }}
             >
-              {item.element({
-                sideId: item.id,
-                options: item.options,
-                close,
-                open,
-                update,
-              })}
+              {item.element(elementProps)}
             </div>
           </React.Fragment>
         );
