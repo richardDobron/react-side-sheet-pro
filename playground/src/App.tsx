@@ -4,6 +4,7 @@ import {
   SideSheet,
   useSideSheet,
   SideElementProps,
+  SideComponent,
 } from 'react-side-sheet-pro';
 
 type User = { id: number; name: string; email: string };
@@ -15,8 +16,8 @@ const users: User[] = [
 
 // Side 1: User List
 
-type UserListProps = SideElementProps;
-export const UserList: React.FC<UserListProps> = ({
+type UserListProps = {};
+export const UserList: SideComponent<UserListProps> = ({
   open,
   sideId,
   close,
@@ -99,12 +100,14 @@ export const UserList: React.FC<UserListProps> = ({
   </>
 );
 
+UserList.defaultWidth = 900;
+
 // Side 2: Edit User
 
 type EditUserProps = SideElementProps & {
   user: Partial<User>;
 };
-export const EditUser: React.FC<EditUserProps> = ({
+export const EditUser: SideComponent<EditUserProps> = ({
   user,
   sideId,
   close,
@@ -178,7 +181,7 @@ export const EditUser: React.FC<EditUserProps> = ({
 type UserDetailsProps = SideElementProps & {
   user: User;
 };
-export const UserDetails: React.FC<UserDetailsProps> = ({
+export const UserDetails: SideComponent<UserDetailsProps> = ({
   user,
   sideId,
   close,
@@ -207,7 +210,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
               className="btn"
               onClick={() =>
                 open(props => <UserList {...props} />, {
-                  width: 600,
+                    // when width is not set, UserList.defaultWidth will be used
                 })
               }
             >

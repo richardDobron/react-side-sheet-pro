@@ -11,9 +11,10 @@ export const DEFAULT_OPTIONS: Required<SideSheetOptions> = {
       : Promise.resolve(true),
 };
 
-export const DEFAULT_SHEET_OPTIONS: Required<SideOptions> = {
+export const DEFAULT_SHEET_OPTIONS: Required<Omit<SideOptions, 'width'>> & {
+  width?: number;
+} = {
   id: '',
-  width: 400,
   className: '',
   confirmBeforeClose: false,
   confirmMessage: null,

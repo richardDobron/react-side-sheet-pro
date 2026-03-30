@@ -1,5 +1,5 @@
 /// <reference types="react" />
-import { ReactNode } from "react";
+import { ComponentType, JSXElementConstructor, ReactElement } from "react";
 type Sides = "left" | "right";
 interface SideSheetOptions {
     side: Sides;
@@ -24,19 +24,23 @@ interface SideOptions {
 interface SideElementProps {
     sideId: number | string;
     close: (id: number | string | null, force?: boolean) => Promise<void>;
-    open: (element: SideElement, options?: SideOptions) => number | string;
+    open: (element: SideComponent, options?: SideOptions) => number | string;
     update: (id: number | string, options: SideOptions) => void;
     options: SideOptions;
+    width?: number;
 }
-type SideElement = (props: SideElementProps) => ReactNode;
+type SideComponent<P = {}> =
+    ComponentType<P & SideElementProps> & {
+    defaultWidth?: number;
+};
 interface SideStackItem {
     id: number | string;
-    element: SideElement;
+    element: SideComponent;
     options: Required<SideOptions>;
     state: "opening" | "open" | "closing";
 }
 interface SideSheetContextValue {
-    open: (el: SideElement, opts?: SideOptions) => number | string;
+    open: (el: SideComponent, opts?: SideOptions) => number | string;
     close: (id: number | string | null, force?: boolean) => Promise<void>;
     update: (id: number | string, opts: SideOptions) => void;
     config: SideSheetOptions;
@@ -62,4 +66,4 @@ declare const SideSheet: {
         className?: string | undefined;
     }>;
 };
-export { useSideSheet, Sides, SideSheetOptions, SideOptions, SideElementProps, SideElement, SideStackItem, SideSheetContextValue, SideSheet };
+export { useSideSheet, Sides, SideSheetOptions, SideOptions, SideElementProps, SideComponent, SideStackItem, SideSheetContextValue, SideSheet };

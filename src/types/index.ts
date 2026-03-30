@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ComponentType, ReactElement } from 'react';
 
 export type Sides = 'left' | 'right';
 
@@ -27,17 +27,23 @@ export interface SideOptions {
 export interface SideElementProps {
   sideId: number | string;
   close: (id: number | string | null) => Promise<void>;
-  open: (element: SideElement, options?: SideOptions) => number | string;
+  open: (element: SideComponent, options?: SideOptions) => number | string;
   update: (id: number | string, options: SideOptions) => void;
   options: SideOptions;
 }
 
-export type SideElement = (props: SideElementProps) => ReactNode;
+export type SideComponent<P = {}> = ComponentType<P & SideElementProps> & {
+  defaultWidth?: number;
+};
+
+export type SideElement = (
+  props: SideElementProps
+) => ReactElement<any, SideComponent>;
 
 export interface SideStackItem {
   id: number | string;
   element: SideElement;
-  options: Required<SideOptions>;
+  options: Required<Omit<SideOptions, 'width'>> & { width?: number };
   state: 'opening' | 'open' | 'closing';
 }
 

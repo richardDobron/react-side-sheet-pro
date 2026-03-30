@@ -42,10 +42,10 @@ yarn add react-side-sheet-pro
 ## ⚡️ Quick Start
 ```typescript jsx
 import React from 'react'
-import { SideSheet, useSideSheet, SideElementProps } from 'react-side-sheet-pro'
+import { SideSheet, SideComponent, useSideSheet } from 'react-side-sheet-pro'
 import 'react-side-sheet-pro/dist/index.css'
 
-const UserDetails: React.FC<SideElementProps & { user: any }> = ({
+const UserDetails: SideComponent<{ user: any }> = ({
     user,
     sideId,
     close,
@@ -68,6 +68,8 @@ const UserDetails: React.FC<SideElementProps & { user: any }> = ({
     </>
 )
 
+UserDetails.defaultWidth = 900
+
 export const App = () => {
     const { open } = useSideSheet()
 
@@ -84,6 +86,7 @@ export const App = () => {
                 />
             ),
             {
+                // you can override the default width set on the component
                 width: 600,
             }
         )

@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import classNames from 'classnames';
 import {
   SideElement,
+  SideElementProps,
   SideOptions,
   SideSheetOptions,
   SideStackItem,
@@ -13,6 +14,12 @@ type SideSheetContainerProps = {
   close: (id: number | string | null) => Promise<void>;
   update: (id: number | string, opts: SideOptions) => void;
   config: Required<SideSheetOptions>;
+};
+
+type ResolvedItem = {
+  id: number | string;
+  element: React.ReactElement;
+  width: number;
 };
 
 function getStackItemMeta(stack: SideStackItem[], idx: number) {
@@ -28,6 +35,7 @@ function getStackItemMeta(stack: SideStackItem[], idx: number) {
 }
 
 function computePadding(
+  resolved: ResolvedItem[],
   stack: SideStackItem[],
   idx: number
 ): number | undefined {
@@ -36,10 +44,10 @@ function computePadding(
     idx
   );
 
-  if (isTop || isPrevClosing || isNextTransitioning || !next) return undefined;
+  if (isTop || isPrevClosing || isNextTransitioning || !next) return;
 
   const viewportWidth = document.documentElement.clientWidth;
-  const maxWidth = stack[stack.length - 1]?.options.width ?? 0;
+  const { width } = resolved[resolved.length - 1];
 
   let padding = 0;
   if (viewportWidth >= 1160) {
@@ -48,9 +56,9 @@ function computePadding(
     padding = Math.floor((viewportWidth - 768) / 2);
   }
 
-  padding = Math.min(padding, maxWidth);
+  padding = Math.min(padding, width);
 
-  return padding > 0 ? padding : next.options.width / 2;
+  return padding > 0 ? padding : resolved[idx + 1]?.width / 2;
 }
 
 export const SideSheetContainer: React.FC<SideSheetContainerProps> = ({
@@ -78,6 +86,25 @@ export const SideSheetContainer: React.FC<SideSheetContainerProps> = ({
 
   const paddingKey = config.side === 'left' ? 'paddingLeft' : 'paddingRight';
 
+  const resolved: ResolvedItem[] = stack.map(item => {
+    const elementProps = {
+      sideId: item.id,
+      options: item.options,
+      close,
+      open,
+      update,
+    } as SideElementProps;
+
+    const element = item.element(elementProps);
+    const width = item.options.width ?? element.type.defaultWidth ?? 400;
+
+    return {
+      id: item.id,
+      element,
+      width,
+    };
+  });
+
   return (
     <>
       {stack.map((item, idx) => {
@@ -87,7 +114,8 @@ export const SideSheetContainer: React.FC<SideSheetContainerProps> = ({
           isPrevClosing,
           isNextTransitioning,
         } = getStackItemMeta(stack, idx);
-        const { width, closeOnOverlayClick, className } = item.options;
+
+        const { closeOnOverlayClick, className } = item.options;
 
         const isEffectiveTop = isTop || isPrevClosing;
         const isVisible = !(
@@ -96,15 +124,8 @@ export const SideSheetContainer: React.FC<SideSheetContainerProps> = ({
         const paddingValue =
           isEffectiveTop || isNextTransitioning || !next
             ? undefined
-            : `${computePadding(stack, idx)}px`;
-
-        const elementProps = {
-          sideId: item.id,
-          options: item.options,
-          close,
-          open,
-          update,
-        };
+            : `${computePadding(resolved, stack, idx)}px`;
+        const { element, width } = resolved[idx];
 
         return (
           <React.Fragment key={item.id}>
@@ -133,7 +154,7 @@ export const SideSheetContainer: React.FC<SideSheetContainerProps> = ({
                 [paddingKey]: paddingValue,
               }}
             >
-              {item.element(elementProps)}
+              {element}
             </div>
           </React.Fragment>
         );
