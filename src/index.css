@@ -21,60 +21,8 @@
   transform: translateX(-100%);
 }
 
-.sidesheet-right.sidesheet-animation-open {
-  animation: sidesheet-open-right 240ms cubic-bezier(0, 0, 0.3, 1);
-}
-
-.sidesheet-left.sidesheet-animation-open {
-  animation: sidesheet-open-left 240ms cubic-bezier(0, 0, 0.3, 1);
-}
-
 .sidesheet.sidesheet-animation-open {
   transform: translateX(0);
-}
-
-.sidesheet-right.sidesheet-animation-closing {
-  animation: sidesheet-close-right 240ms cubic-bezier(0, 0, 0.3, 1);
-}
-
-.sidesheet-left.sidesheet-animation-closing {
-  animation: sidesheet-close-left 240ms cubic-bezier(0, 0, 0.3, 1);
-}
-
-@keyframes sidesheet-open-right {
-  from {
-    transform: translateX(100%);
-  }
-  to {
-    transform: translateX(0);
-  }
-}
-
-@keyframes sidesheet-close-right {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(100%);
-  }
-}
-
-@keyframes sidesheet-open-left {
-  from {
-    transform: translateX(-100%);
-  }
-  to {
-    transform: translateX(0);
-  }
-}
-
-@keyframes sidesheet-close-left {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-100%);
-  }
 }
 
 .sidesheet {
