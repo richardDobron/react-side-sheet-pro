@@ -7,18 +7,20 @@ export const SideSheetHeader: React.FC<{
   onClose?: () => void;
   actions?: ReactNode;
   className?: string;
-}> = React.memo(({ title, onClose, actions, className }) => (
+  closeLabel?: string;
+}> = ({ title, onClose, actions, className, closeLabel = 'Close' }) => (
   <header className={classNames('sidesheet-header', className)}>
     {onClose && (
       <button
         type="button"
         className="sidesheet-header-close sidesheet-header-btn"
+        aria-label={closeLabel}
         onClick={onClose}
       >
-        <HiX />
+        <HiX aria-hidden="true" />
       </button>
     )}
     <div className="sidesheet-header-title">{title}</div>
     {actions}
   </header>
-));
+);
