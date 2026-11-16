@@ -1,65 +1,27 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import classNames from 'classnames';
+import { createFocusTrap, FocusTrap } from 'focus-trap';
+import { RemoveScroll } from 'react-remove-scroll';
 import {
-  SideElement,
-  SideElementProps,
-  SideOptions,
+  CloseSide,
+  OpenSide,
+  SideId,
   SideSheetOptions,
   SideStackItem,
+  UpdateSide,
 } from '../types';
 
 type SideSheetContainerProps = {
   stack: SideStackItem[];
-  open: (el: SideElement, opts?: SideOptions) => number | string;
-  close: (id: number | string | null) => Promise<void>;
-  update: (id: number | string, opts: SideOptions) => void;
+  open: OpenSide;
+  close: CloseSide;
+  update: UpdateSide;
   config: Required<SideSheetOptions>;
 };
 
-type ResolvedItem = {
-  id: number | string;
-  element: React.ReactElement;
-  width: number;
-};
-
-function getStackItemMeta(stack: SideStackItem[], idx: number) {
-  const prev = stack[idx - 1];
-  const next = stack[idx + 1];
-  return {
-    prev,
-    next,
-    isTop: idx === stack.length - 1,
-    isPrevClosing: prev?.state === 'closing',
-    isNextTransitioning: next?.state === 'closing' || next?.state === 'opening',
-  };
-}
-
-function computePadding(
-  resolved: ResolvedItem[],
-  stack: SideStackItem[],
-  idx: number
-): number | undefined {
-  const { next, isTop, isPrevClosing, isNextTransitioning } = getStackItemMeta(
-    stack,
-    idx
-  );
-
-  if (isTop || isPrevClosing || isNextTransitioning || !next) return;
-
-  const viewportWidth = document.documentElement.clientWidth;
-  const { width } = resolved[resolved.length - 1];
-
-  let padding = 0;
-  if (viewportWidth >= 1160) {
-    padding = Math.floor((viewportWidth - 960) / 2);
-  } else if (viewportWidth >= 768) {
-    padding = Math.floor((viewportWidth - 768) / 2);
-  }
-
-  padding = Math.min(padding, width);
-
-  return padding > 0 ? padding : resolved[idx + 1]?.width / 2;
-}
+const isSecondary = (stack: SideStackItem[], idx: number) =>
+  stack[idx].state !== 'closing' &&
+  stack.slice(idx + 1).some(i => i.state !== 'closing');
 
 export const SideSheetContainer: React.FC<SideSheetContainerProps> = ({
   stack,
@@ -68,13 +30,58 @@ export const SideSheetContainer: React.FC<SideSheetContainerProps> = ({
   update,
   config,
 }) => {
+  const sheetRefs = useRef(new Map<SideId, HTMLDivElement>());
+  const trapsRef = useRef(new Map<SideId, FocusTrap>());
+  const top = stack.filter(i => i.state !== 'closing').pop();
+
   useEffect(() => {
+    const traps = trapsRef.current;
+    const onScreen = new Set(
+      stack.filter(i => i.state !== 'closing').map(i => i.id)
+    );
+
+    Array.from(traps.keys())
+      .reverse()
+      .filter(id => !onScreen.has(id))
+      .forEach(id => {
+        traps.get(id)?.deactivate();
+        traps.delete(id);
+      });
+
+    stack.forEach(item => {
+      const el = sheetRefs.current.get(item.id);
+      if (!onScreen.has(item.id) || traps.has(item.id) || !el) return;
+      const trap = createFocusTrap(el, {
+        initialFocus: el,
+        fallbackFocus: el,
+        escapeDeactivates: false,
+        allowOutsideClick: true,
+        preventScroll: true,
+      });
+      traps.set(item.id, trap);
+      trap.activate();
+    });
+  }, [stack]);
+
+  useEffect(
+    () => () => {
+      Array.from(trapsRef.current.values())
+        .reverse()
+        .forEach(trap => trap.deactivate());
+    },
+    []
+  );
+
+  useEffect(() => {
+    if (!top) return undefined;
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        const top = stack[stack.length - 1];
-        if (top?.options.closeOnEsc && top.state === 'open') {
-          close(top.id);
-        }
+      if (
+        e.key === 'Escape' &&
+        !e.defaultPrevented &&
+        top.options.closeOnEsc &&
+        top.state === 'open'
+      ) {
+        close(top.id);
       }
     };
 
@@ -82,50 +89,35 @@ export const SideSheetContainer: React.FC<SideSheetContainerProps> = ({
     return () => {
       document.removeEventListener('keydown', onKeyDown);
     };
-  }, [stack, close]);
+  }, [top, close]);
 
-  const paddingKey = config.side === 'left' ? 'paddingLeft' : 'paddingRight';
-
-  const resolved: ResolvedItem[] = stack.map(item => {
-    const elementProps = {
+  const rendered = stack.map(item => {
+    const element = item.element({
       sideId: item.id,
       options: item.options,
-      close,
       open,
+      close,
       update,
-    } as SideElementProps;
-
-    const element = item.element(elementProps);
-    const width = item.options.width ?? element.type.defaultWidth ?? 400;
-
-    return {
-      id: item.id,
-      element,
-      width,
-    };
+    });
+    const width: number =
+      item.options.width ?? element.type.defaultWidth ?? 400;
+    return { element, width };
   });
 
   return (
-    <>
+    <RemoveScroll enabled={!config.enableOverflow && stack.length > 0}>
       {stack.map((item, idx) => {
         const {
-          next,
-          isTop,
-          isPrevClosing,
-          isNextTransitioning,
-        } = getStackItemMeta(stack, idx);
-
-        const { closeOnOverlayClick, className } = item.options;
-
-        const isEffectiveTop = isTop || isPrevClosing;
-        const isVisible = !(
-          config.mountStrategy === 'top-only' && !isEffectiveTop
+          closeOnOverlayClick,
+          className,
+          animationDuration,
+        } = item.options;
+        const secondary = isSecondary(stack, idx);
+        const isVisible = !(config.mountStrategy === 'top-only' && secondary);
+        const { element, width } = rendered[idx];
+        const aboveIdx = stack.findIndex(
+          (i, j) => j > idx && i.state !== 'closing'
         );
-        const paddingValue =
-          isEffectiveTop || isNextTransitioning || !next
-            ? undefined
-            : `${computePadding(resolved, stack, idx)}px`;
-        const { element, width } = resolved[idx];
 
         return (
           <React.Fragment key={item.id}>
@@ -140,18 +132,27 @@ export const SideSheetContainer: React.FC<SideSheetContainerProps> = ({
               />
             )}
             <div
+              ref={el => {
+                if (el) sheetRefs.current.set(item.id, el);
+                else sheetRefs.current.delete(item.id);
+              }}
               role="dialog"
               aria-modal="true"
+              tabIndex={-1}
               className={classNames(
                 'sidesheet',
                 `sidesheet-animation-${item.state}`,
                 `sidesheet-${config.side}`,
+                secondary && 'sidesheet-secondary',
                 !isVisible && 'sidesheet-invisible',
                 className
               )}
               style={{
-                width: isEffectiveTop ? `${width}px` : '100%',
-                [paddingKey]: paddingValue,
+                width: `${width}px`,
+                minWidth: secondary
+                  ? `calc(100vw - ${rendered[aboveIdx].width}px)`
+                  : '0px',
+                transitionDuration: `${animationDuration}ms`,
               }}
             >
               {element}
@@ -159,6 +160,6 @@ export const SideSheetContainer: React.FC<SideSheetContainerProps> = ({
           </React.Fragment>
         );
       })}
-    </>
+    </RemoveScroll>
   );
 };

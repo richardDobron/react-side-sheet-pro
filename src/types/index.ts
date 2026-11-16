@@ -2,6 +2,8 @@ import { ComponentType, ReactElement } from 'react';
 
 export type Sides = 'left' | 'right';
 
+export type SideId = number | string;
+
 export interface SideSheetOptions {
   side: Sides;
   enableOverflow: boolean;
@@ -11,7 +13,7 @@ export interface SideSheetOptions {
 }
 
 export interface SideOptions {
-  id?: string | number;
+  id?: SideId;
   width?: number;
   className?: string;
   confirmBeforeClose?: boolean;
@@ -20,15 +22,19 @@ export interface SideOptions {
   closeOnOverlayClick?: boolean;
   closeOnEsc?: boolean;
   animationDuration?: number;
-  onOpen?: (id: number | string) => void;
-  onClose?: (id: number | string) => void;
+  onOpen?: (id: SideId) => void;
+  onClose?: (id: SideId) => void;
 }
 
+export type OpenSide = (element: SideElement, options?: SideOptions) => SideId;
+export type CloseSide = (id: SideId | null, force?: boolean) => Promise<void>;
+export type UpdateSide = (id: SideId, options: SideOptions) => void;
+
 export interface SideElementProps {
-  sideId: number | string;
-  close: (id: number | string | null) => Promise<void>;
-  open: (element: SideComponent, options?: SideOptions) => number | string;
-  update: (id: number | string, options: SideOptions) => void;
+  sideId: SideId;
+  open: OpenSide;
+  close: CloseSide;
+  update: UpdateSide;
   options: SideOptions;
 }
 
@@ -41,15 +47,15 @@ export type SideElement = (
 ) => ReactElement<any, SideComponent>;
 
 export interface SideStackItem {
-  id: number | string;
+  id: SideId;
   element: SideElement;
   options: Required<Omit<SideOptions, 'width'>> & { width?: number };
   state: 'opening' | 'open' | 'closing';
 }
 
 export interface SideSheetContextValue {
-  open: (el: SideElement, opts?: SideOptions) => number | string;
-  close: (id: number | string | null, force: boolean) => Promise<void>;
-  update: (id: number | string, opts: SideOptions) => void;
+  open: OpenSide;
+  close: CloseSide;
+  update: UpdateSide;
   config: SideSheetOptions;
 }

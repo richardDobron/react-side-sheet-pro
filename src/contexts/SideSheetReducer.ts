@@ -1,11 +1,11 @@
-import { SideOptions, SideStackItem } from '../types';
+import { SideId, SideOptions, SideStackItem } from '../types';
 
 type Action =
   | { type: 'OPEN'; payload: SideStackItem }
-  | { type: 'SET_OPEN'; id: number | string }
-  | { type: 'CLOSE'; id: number | string | null }
-  | { type: 'REMOVE'; id: number | string }
-  | { type: 'UPDATE'; id: number | string; options: Partial<SideOptions> };
+  | { type: 'SET_OPEN'; id: SideId }
+  | { type: 'CLOSE'; id: SideId | null }
+  | { type: 'REMOVE'; id: SideId }
+  | { type: 'UPDATE'; id: SideId; options: Partial<SideOptions> };
 
 export const SideSheetReducer = (
   state: SideStackItem[],
@@ -16,7 +16,9 @@ export const SideSheetReducer = (
       return [...state, action.payload];
     case 'SET_OPEN':
       return state.map(item =>
-        item.id === action.id ? { ...item, state: 'open' } : item
+        item.id === action.id && item.state === 'opening'
+          ? { ...item, state: 'open' }
+          : item
       );
     case 'CLOSE':
       return state.map(item =>
